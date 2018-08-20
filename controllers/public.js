@@ -1,45 +1,39 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema;
-
-const Mongoose = require('mongoose').Mongoose
-const ddbb = new Mongoose()
+const Schema = mongoose.Schema
+const chalk = require('chalk')
 
 const Proyecto = require('../models/proyecto')
 const Coleccion = require('../models/coleccion')
-const ModeloDinamico = require('../models/dinamico')
+// const ModeloDinamico = require('../models/dinamico')
 
+async function conectarBBDD() {}
 
 function listarColeccion(req, res) {
 
-	const idProyecto = req.params.idProyecto
-	const nameColeccion = req.params.nameColeccion
-
-	Proyecto.findOne({ id: idProyecto }, (err, proyecto) => {
+	Coleccion.findOne({ projectId: req.params.idProyecto, name: req.params.nameColeccion }, (err, coleccion) => {
 		if (err) return res.status(500).send({ message: `ERROR al realizar la consulta: ${err}` })
-		if (!proyecto) return res.status(400).send({ message: `ERROR: No existe el proyecto` })
-		
-		// Comprobar que el proyecto tiene una colección con el nombre recibido
-		if (!proyecto.collections.some( e => e.name === nameColeccion)) {
-			return res.status(200).send('ERROR: No existe la colección')
-		}
+		if (!coleccion) return res.status(400).send({ message: `ERROR: No existe el proyecto o la coleccion` })
 
-		Coleccion.findOne({ projectId: idProyecto, name: nameColeccion }, (err, coleccion) => {
-			if (err) return res.status(500).send({ message: `ERROR al realizar la consulta: ${err}` })
-			if (!coleccion) return res.status(500).send({ message: `ERROR: No existe la coleccion buscada` })
+		let bbdd = new mongoose.Mongoose()
 
-			let dinamicSchema = new Schema(coleccion.model, { collection: coleccion.name })
-			
-			ddbb.connect('mongodb://localhost:27017/' + coleccion.projectId, (err, resolve) => {
-				if (err) return res.status(500).send({ message: `ERROR al realizar conexion ddbb: ${err}` })
-
-				const ColeccionDinamica = ddbb.model('ColeccionDinamica', dinamicSchema);
+		bbdd.connect('mongodb://localhost:27017/' + coleccion.projectId, {useNewUrlParser: true})
+			.then(() => {
+				console.log(chalk.green('----> Conectado a: ' + bbdd.connection.name) )
+				
+				const dinamicSchema = new Schema(coleccion.model, { collection: coleccion.name })
+				const ColeccionDinamica = bbdd.model('ColeccionDinamica', dinamicSchema);
 
 				ColeccionDinamica.find({}, (err, coleccionDinamica) => {
-					delete ddbb.connection.models['ColeccionDinamica'];
+					delete bbdd.connection.models['ColeccionDinamica'];
+					// bbdd.connection.close()
+					bbdd.disconnect()
+					console.log(chalk.yellow('----> Desconectado de: ' + bbdd.connection.name) )
 					return res.status(200).send(coleccionDinamica)
-				})
+				})				
 			})
-		})
+			.catch((err) => {
+				console.log('++++++++++++ ERROR')
+			})
 	})
 }
 
