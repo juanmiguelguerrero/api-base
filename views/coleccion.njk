@@ -27,7 +27,12 @@
 						<label for="exampleInputEmail1">Escriba el nombre del proyecto a crear:</label>
 						<input type="text" class="form-control" id="nombre" placeholder="Nombre" v-model="name">
 					</div>
-					<button type="submit" class="btn btn-primary">Crear nueva colección</button>
+					<div class="form-group">
+						<label for="">Modelo de la colección (JSON)</label>
+						<textarea class="form-control" id="modelo" rows="10" v-model="model"></textarea>
+						<small>Ver documentación en <a href="https://mongoosejs.com/docs/schematypes.html" target="_blank">https://mongoosejs.com/docs/schematypes.html</a></small>
+					</div>
+					<button type="submit" class="btn btn-success btn-lg mt-3">Crear nueva colección</button>
 				</form>
 			</div>
 			{% endraw %}
@@ -41,28 +46,23 @@
 	new Vue({
 		el: '#app',
 		data: {
-			proyectos: [
-				{ name: 'Uno', value: 1},
-				{ name: 'Dos', value: 2},
-				{ name: 'Tres', value: 3},
-				{ name: 'Cuatro', value: 4}
-			],
+			proyectos: [],
 			proyectoSeleccionado: "",
 			name: "coleccion",
-			pepe: 'soy pepe'
+			model: ""
 		},
 		methods: {
 
 			submitForm() {
 
 				let axiosConfig = {
-					url: '/api/proyecto',
-					data: { name: this.name },
+					url: '/api/coleccion',
+					data: { projectId: this.proyectoSeleccionado, name: this.name, model: JSON.stringify(this.model) },
 					options: { headers: { 'content-type': 'application/json' } }
 				}
 
 				axios.post(axiosConfig.url, axiosConfig.data, axiosConfig.options)
-					.then( response => alert('Se ha creado el proyecto'))
+					.then( response => alert('Se ha creado la colección'))
 					.catch( err => console.log(err))
 			}
 		},

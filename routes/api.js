@@ -25,7 +25,7 @@ const coleccionesCtrl = require('../controllers/colecciones')
 router.post('/proyecto', proyectosCtrl.crearProyecto)
 
 // Crear una coleccion
-router.post('/coleccion/:idProyecto', coleccionesCtrl.crearColeccion)
+router.post('/coleccion', coleccionesCtrl.crearColeccion)
 
 // Listar mis proyectos
 router.get('/proyectos', proyectosCtrl.listarProyectos)

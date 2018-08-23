@@ -6,12 +6,11 @@ const Proyecto = require('../models/proyecto')
 const Coleccion = require('../models/coleccion')
 
 function crearColeccion(req, res) {
-	const idProyecto = req.params.idProyecto
 	const coleccion = req.body
 
 	const nuevaColeccion = new Coleccion() 
 
-	Proyecto.findOne({ id: idProyecto }, (err, proyecto) => {
+	Proyecto.findOne({ id: coleccion.projectId }, (err, proyecto) => {
 
 		if (err) return res.status(500).send({ message: `ERROR al consultar colecciones del proyecto: ${err}` })
 		if (!proyecto) return res.status(400).send({ message: `ERROR el proyecto no existe` })
@@ -27,7 +26,7 @@ function crearColeccion(req, res) {
 		nuevaColeccion.name = coleccion.name
 		nuevaColeccion.model = coleccion.model
 		nuevaColeccion.id = generate(alphabet, 10)
-		nuevaColeccion.projectId = proyecto.id
+		nuevaColeccion.projectId = coleccion.projectId
 
 		// Guardar la colección
 		nuevaColeccion.save((err, coleccionGuardada) => {
@@ -37,7 +36,7 @@ function crearColeccion(req, res) {
 		// Asociar la colección al proyecto
 		// proyecto.collections.push({ id: nuevaColeccion.id, name: nuevaColeccion.name })
 
-		let query   = { id: idProyecto }
+		let query   = { id: coleccion.projectId }
 		let update  = { $push: { collections: { id: nuevaColeccion.id, name: nuevaColeccion.name } } }
 		let options = { new: true }
 
@@ -45,11 +44,11 @@ function crearColeccion(req, res) {
 			if (err) return res.status(500).send({ message: `Error al actualizar proyecto: ${err}` })
 
 			console.log('_______________' + JSON.stringify(resp) )
+			return res.status(200).send('Se ha creado la coleccion')
 		})
 
 	})
 
-	return res.status(200).send('Se ha creado la coleccion')
 }
 
 function listarColecciones(req, res) {
