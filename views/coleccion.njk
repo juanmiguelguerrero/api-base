@@ -1,0 +1,76 @@
+{% extends "layout.njk" %}
+
+{% block body %}
+
+
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-4">
+			{% include "menu.njk" %}
+		</div>
+		<div class="col-md-1"></div>
+		<div class="col-md-7">
+			{% raw %}
+			<div id="app" style="margin-top: 100px;">
+				<h3 class="mb-5">Crear nuevo colección</h3>
+				<form @submit.prevent="submitForm">
+					<div class="form-group">
+						<label for="">Selecciona el proyecto</label>
+						<select class="form-control mb-4" v-model="proyectoSeleccionado">
+							<option value="">Seleccionar proyecto...</option>
+							<option v-for="proyecto in proyectos" :key="proyecto.id" :value="proyecto.id">{{proyecto.name}}</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="exampleInputEmail1">Escriba el nombre del proyecto a crear:</label>
+						<input type="text" class="form-control" id="nombre" placeholder="Nombre" v-model="name">
+					</div>
+					<button type="submit" class="btn btn-primary">Crear nueva colección</button>
+				</form>
+			</div>
+			{% endraw %}
+		</div>
+	</div>
+</div>
+
+
+<script>
+
+	new Vue({
+		el: '#app',
+		data: {
+			proyectos: [
+				{ name: 'Uno', value: 1},
+				{ name: 'Dos', value: 2},
+				{ name: 'Tres', value: 3},
+				{ name: 'Cuatro', value: 4}
+			],
+			proyectoSeleccionado: "",
+			name: "coleccion",
+			pepe: 'soy pepe'
+		},
+		methods: {
+
+			submitForm() {
+
+				let axiosConfig = {
+					url: '/api/proyecto',
+					data: { name: this.name },
+					options: { headers: { 'content-type': 'application/json' } }
+				}
+
+				axios.post(axiosConfig.url, axiosConfig.data, axiosConfig.options)
+					.then( response => alert('Se ha creado el proyecto'))
+					.catch( err => console.log(err))
+			}
+		},
+		mounted() {
+			axios.get('/api/proyectos').then(response => this.proyectos = response.data.projects);
+		}
+	})
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "layout.njk" %}
+
+{% block body %}
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-4">
+			{% include "menu.njk" %}
+		</div>
+		<div class="col-md-1"></div>
+		<div class="col-md-7">
+			<div id="app" style="margin-top: 100px;">
+				<h3 class="mb-5">Crear nuevo proyecto</h3>
+				<form @submit.prevent="submitForm">
+					<div class="form-group">
+						<label for="exampleInputEmail1">Escriba el nombre su nuevo proyecto:</label>
+						<input type="text" class="form-control" id="nombre" placeholder="Nombre" v-model="name">
+					</div>
+					<button type="submit" class="btn btn-primary">Crear nuevo proyecto</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+
+	new Vue({
+		el: '#app',
+		data: {
+			name: "pepe"
+		},
+		methods: {
+
+			submitForm() {
+
+				let axiosConfig = {
+					url: '/api/proyecto',
+					data: { name: this.name },
+					options: { headers: { 'content-type': 'application/json' } }
+				}
+
+				axios.post(axiosConfig.url, axiosConfig.data, axiosConfig.options)
+					.then( response => alert('Se ha creado el proyecto'))
+					.catch( err => console.log(err))
+			}
+		}
+	})
+</script>
+	
+
+{% endblock %}
