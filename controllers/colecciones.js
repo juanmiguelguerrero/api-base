@@ -52,7 +52,11 @@ function crearColeccion(req, res) {
 }
 
 function listarColecciones(req, res) {
+	Coleccion.find({projectId: req.params.idProyecto }, (err, coleccion) => {
+		if (err) return res.status(500).send({ message: `Error al listar coleccion: ${err}` })
 
+		res.status(200).send({ collection: coleccion })
+	})
 }
 
 module.exports = {

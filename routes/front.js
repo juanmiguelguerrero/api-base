@@ -17,17 +17,10 @@ router.get ('/coleccion', (req,res,next) => {
 	res.render ('coleccion');
 });
 
-// router.get ('/proyecto', function (req, res, next) {
+router.get ('/cargardatos', (req,res,next) => {
 
-// 	res.render ('layout');
-// });
-
-// Formulario alta nueva colección
-// router.get ('/proyecto', function (req, res, next) {
-
-// 	res.render ('layout');
-// });
-
+	res.render ('cargardatos');
+});
 
 module.exports = router
 
