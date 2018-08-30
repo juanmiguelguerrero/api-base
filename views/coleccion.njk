@@ -11,9 +11,11 @@
 		</div>
 		<div class="col-md-1"></div>
 		<div class="col-md-7">
+			
 			{% raw %}
+
 			<div id="app" style="margin-top: 100px;">
-				<h3 class="mb-5">Crear nuevo colección</h3>
+				<h3 class="mb-5">Crear nueva colección</h3>
 				<form @submit.prevent="submitForm">
 					<div class="form-group">
 						<label for="">Selecciona el proyecto</label>
@@ -24,18 +26,20 @@
 					</div>
 
 					<div class="form-group">
-						<label for="exampleInputEmail1">Escriba el nombre del proyecto a crear:</label>
-						<input type="text" class="form-control" id="nombre" placeholder="Nombre" v-model="name">
+						<label for="exampleInputEmail1">Escriba el nombre de la colección a crear:</label>
+						<input type="text" class="form-control" id="nombre" placeholder="Nombre" v-model="coleccion.name">
 					</div>
 					<div class="form-group">
 						<label for="">Modelo de la colección (JSON)</label>
-						<textarea class="form-control" id="modelo" rows="10" v-model="model"></textarea>
+						<textarea class="form-control" id="modelo" rows="10" v-model="coleccion.model"></textarea>
 						<small>Ver documentación en <a href="https://mongoosejs.com/docs/schematypes.html" target="_blank">https://mongoosejs.com/docs/schematypes.html</a></small>
 					</div>
 					<button type="submit" class="btn btn-success btn-lg mt-3">Crear nueva colección</button>
 				</form>
 			</div>
+
 			{% endraw %}
+
 		</div>
 	</div>
 </div>
@@ -48,16 +52,23 @@
 		data: {
 			proyectos: [],
 			proyectoSeleccionado: "",
-			name: "coleccion",
-			model: ""
+			coleccion: {
+				projectId: "",
+				name: "",
+				model: '{"name": "String", "age": "Number"}'
+			}
 		},
 		methods: {
 
 			submitForm() {
 
+				this.coleccion.projectId = this.proyectoSeleccionado
+
+				console.log (this.coleccion)
+
 				let axiosConfig = {
 					url: '/api/coleccion',
-					data: { projectId: this.proyectoSeleccionado, name: this.name, model: JSON.stringify(this.model) },
+					data: this.coleccion,
 					options: { headers: { 'content-type': 'application/json' } }
 				}
 

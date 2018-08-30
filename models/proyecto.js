@@ -10,10 +10,12 @@ const ProyectoSchema = Schema ({
 	uri: String,
 	collections: [
 		{
-			id: { type: String, lowercase: true},
-			name: String,
-			description: String,
-			uri: String
+			id: { type: String, required: true, lowercase: true },
+			projectId: { type: String, required: true },
+			name: { type: String, required: true },
+			created: { type: Date, default: Date.now },
+			updated: { type: Date, default: Date.now },
+			model: { type: String }
 		}
 	]
 

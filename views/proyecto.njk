@@ -29,7 +29,7 @@
 	new Vue({
 		el: '#app',
 		data: {
-			name: "pepe"
+			name: ""
 		},
 		methods: {
 
@@ -43,7 +43,7 @@
 
 				axios.post(axiosConfig.url, axiosConfig.data, axiosConfig.options)
 					.then( response => alert('Se ha creado el proyecto'))
-					.catch( err => console.log(err))
+					.catch( err => alert('ERROR: ' + err))
 			}
 		}
 	})

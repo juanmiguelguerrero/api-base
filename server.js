@@ -28,7 +28,7 @@ app.use('/front', front)
 app.use('/api', api)
 app.use('/', public)
 
-mongoose.connect(config.db, {useNewUrlParser: true}, (err, res) => {
+mongoose.connect(config.db + config.bbdd, {useNewUrlParser: true}, (err, res) => {
 	if (err) {
 		return console.log(chalk.red(`Error al conectar a la base de datos: ${err}`))
 	}

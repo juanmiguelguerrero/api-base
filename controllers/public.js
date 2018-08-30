@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 const chalk = require('chalk')
 
 const Proyecto = require('../models/proyecto')
-const Coleccion = require('../models/coleccion')
+// const Coleccion = require('../models/coleccion')
 // const ModeloDinamico = require('../models/dinamico')
 
 async function conectarBBDD() {}

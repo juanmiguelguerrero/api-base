@@ -33,6 +33,8 @@ router.get('/proyectos', proyectosCtrl.listarProyectos)
 // Listar las colecciones de un proyecto
 router.get('/colecciones/:idProyecto', coleccionesCtrl.listarColecciones)
 
+// Cargar datos en una colección
+router.post('/cargardatos/', coleccionesCtrl.cargarDatos)
 
 
 module.exports = router
