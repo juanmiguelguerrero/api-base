@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
+const generator = require('mongoose-gen')
 const Schema = mongoose.Schema
+
 const generate = require('nanoid/generate')
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
 const chalk = require('chalk')
@@ -67,53 +69,41 @@ function cargarDatos(req, res) {
 
 		let bbddColeccion = new mongoose.Mongoose()
 
-		bbddColeccion.connect(config.db + "/" + coleccionId, {useNewUrlParser: true})
+		// Abro una nueva bbdd con el nombre del proyecto
+		bbddColeccion.connect(config.db + "/" + proyectoId, {useNewUrlParser: true})
 			.then(() => {
 				console.log(chalk.yellow('----> Conectado a: ' + bbddColeccion.connection.name) )
 
-
 				// Selecciono el modelo de la colección a usar
 				let coleccion = proyecto.collections.find(function (e) { return e.id == coleccionId })
-				let modelo = coleccion.model
-				// let modelo = JSON.parse(coleccion.model)
+				let modelo = JSON.parse(coleccion.model)
 
-				console.log('Modelo: ' + modelo)
-
-				// Mapeo el modelo cargado para hacerlo compatible con el Schema de Mongoose
-				// const map = {
-				// 	// String: mongoose.Types.String,
-				// 	// Number: mongoose.Types.Number
-				// 	String: String,
-				// 	Number: Number
-				// } 
-
-				// for (let m in modelo) {
-				// 	modelo[m] = map[modelo[m]];
-				// 	console.log(m + " --- " + map[modelo[m]])
-				// }
-
-				// console.log(JSON.parse(modelo))
-				// console.log(JSON.stringify(modelo))
-
-				
-				
-				const dinamicSchema = new Schema(modelo, { collection: coleccion.name })
+				// Creo un esquema tomando el modelo de la colección
+				const dinamicSchema = new Schema(generator.convert(modelo), { collection: coleccion.name })
+				// Creo un modelo tomando el esquema de la colección
 				const ColeccionDinamica = bbddColeccion.model('ColeccionDinamica', dinamicSchema);
 
-				// ColeccionDinamica.find({}, (err, coleccionDinamica) => {
-				// 	delete bbddColeccion.connection.models['ColeccionDinamica'];
-				// 	// bbdd.connection.close()
-					// bbddColeccion.disconnect()
-				// 	console.log(chalk.yellow('----> Desconectado de: ' + bbddColeccion.connection.name) )
-				// 	return res.status(200).send(coleccionDinamica)
-				// })				
+				console.log(dinamicSchema.obj)
+
+				// Guardo los datos recibidos en la request en la colección
+				ColeccionDinamica.create( payload, (err, datosGuardados) => {
+					if (err) return res.status(500).send({ message: `Error al guardar datos: ${err}` })
+
+					// Elimino el modelo de la conexión
+					delete bbddColeccion.connection.models['ColeccionDinamica'];
+					
+					// Cierro la conexión a la bbdd
+					// bbdd.connection.close()
+					bbddColeccion.disconnect()
+					console.log(chalk.yellow('----> Desconectado de: ' + bbddColeccion.connection.name) )
+
+					res.status(200).send({ data: datosGuardados })
+				})			
 			})
 			.catch((err) => {
 				console.log(err)
 			})
 	})
-
-	
 }
 
 module.exports = {

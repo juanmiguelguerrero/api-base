@@ -31,11 +31,11 @@
 							<option v-for="coleccion in colecciones" :key="coleccion.id" :value="coleccion.id">{{coleccion.name}}</option>
 						</select>
 					</div>
-					
-					<div class="form-group">
-						<label for="">Modelo de la colección (JSON)</label>
-						<textarea class="form-control" id="modelo" rows="10" v-model="model"></textarea>
+					<div class="form-group" v-for="(campo, key, index) in modelo">
+						<label for="" style="text-transform: capitalize">{{ key }} ({{ campo.type }})</label>
+						<input type="text" class="form-control" :key="index" :id="index" v-model="payload[key]">
 					</div>
+	
 					<button type="submit" class="btn btn-success btn-lg mt-3">Guardar dartos en colección</button>
 				</form>
 			</div>
@@ -56,40 +56,50 @@
 			colecciones: [],
 			proyectoSeleccionado: "",
 			coleccionSeleccionada: "",
-			name: "coleccion",
-			model: ""
+			modelo: {},
+			payload: {}
 		},
 		methods: {
 			cargaColecciones() {
 				if (this.proyectoSeleccionado) {
-					let proyecto = this.proyectos.filter(item => item.id === this.proyectoSeleccionado)
-					this.colecciones = proyecto[0].collections
+					let proyecto = this.proyectos.find(item => item.id === this.proyectoSeleccionado)
+					// console.log(proyecto)
+					this.colecciones = proyecto.collections
 				}
 			},
 
 			cargarModelo() {
 				if (this.coleccionSeleccionada) {
-					axios.get('/api/colecciones/' + this.proyectoSeleccionado)
-						.then((response) => {
-							console.log(response)
-							//this.model = response.data.collection.model);
-							// this.model = coleccion[0].model
-							let proyecto = this.proyectos.filter(item => item.id === this.proyectoSeleccionado)
-							this.colecciones = proyecto[0].collections
-						)}
+					let proyecto = this.proyectos.find(item => item.id === this.proyectoSeleccionado)
+					let coleccion = proyecto.collections.find(item => item.id === this.coleccionSeleccionada).model
+					this.modelo = JSON.parse(coleccion)
+					console.log(this.modelo)
+				}
+				// if (this.coleccionSeleccionada) {
+				// 	axios.get('/api/colecciones/' + this.proyectoSeleccionado)
+				// 		.then((response) => {
+				// 			console.log(response)
+				// 			//this.model = response.data.collection.model);
+				// 			// this.model = coleccion[0].model
+				// 			let proyecto = this.proyectos.filter(item => item.id === this.proyectoSeleccionado)
+				// 			this.colecciones = proyecto[0].collections
+				// 		})
+				// }
 			},
 
 			submitForm() {
 
 				let axiosConfig = {
-					url: '/api/coleccion',
-					data: { projectId: this.proyectoSeleccionado, name: this.name, model: JSON.stringify(this.model) },
+					url: '/api/cargardatos',
+					data: { proyectoId: this.proyectoSeleccionado, 
+							coleccionId: this.coleccionSeleccionada,
+							payload: this.payload },
 					options: { headers: { 'content-type': 'application/json' } }
 				}
 
 				axios.post(axiosConfig.url, axiosConfig.data, axiosConfig.options)
-					.then( response => alert('Se ha creado la colección'))
-					.catch( err => alert('Error al crear colección'))
+					.then( response => alert('Se ha guardado el dato'))
+					.catch( err => alert('Error al guardar dato'))
 			}
 		},
 		mounted() {

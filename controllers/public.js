@@ -1,65 +1,60 @@
 const mongoose = require('mongoose')
+const generator = require('mongoose-gen')
 const Schema = mongoose.Schema
+
 const chalk = require('chalk')
 
+const config = require('../config')
 const Proyecto = require('../models/proyecto')
-// const Coleccion = require('../models/coleccion')
-// const ModeloDinamico = require('../models/dinamico')
 
-async function conectarBBDD() {}
 
 function listarColeccion(req, res) {
 
-	Coleccion.findOne({ projectId: req.params.idProyecto, name: req.params.nameColeccion }, (err, coleccion) => {
+	let proyectoId = req.params.idProyecto
+	let coleccionName = req.params.nameColeccion
+
+	Proyecto.findOne({ id: proyectoId, 'collections.name': coleccionName }, (err, proyecto) => {
 		if (err) return res.status(500).send({ message: `ERROR al realizar la consulta: ${err}` })
-		if (!coleccion) return res.status(400).send({ message: `ERROR: No existe el proyecto o la coleccion` })
+		if (!proyecto) return res.status(400).send({ message: `ERROR: No existe el proyecto o la coleccion` })
+		let bbddColeccion = new mongoose.Mongoose()
 
-		let bbdd = new mongoose.Mongoose()
-
-		bbdd.connect('mongodb://localhost:27017/' + coleccion.projectId, {useNewUrlParser: true})
+		// Abro una nueva bbdd con el nombre del proyecto
+		bbddColeccion.connect(config.db + "/" + proyectoId, {useNewUrlParser: true})
 			.then(() => {
-				console.log(chalk.green('----> Conectado a: ' + bbdd.connection.name) )
-				
-				const dinamicSchema = new Schema(coleccion.model, { collection: coleccion.name })
-				const ColeccionDinamica = bbdd.model('ColeccionDinamica', dinamicSchema);
+				console.log(chalk.yellow('----> Conectado a: ' + bbddColeccion.connection.name) )
 
-				ColeccionDinamica.find({}, (err, coleccionDinamica) => {
-					delete bbdd.connection.models['ColeccionDinamica'];
+				// Selecciono el modelo de la colección a usar
+				let coleccion = proyecto.collections.find(function (e) { return e.name == coleccionName })
+				let modelo = JSON.parse(coleccion.model)
+
+				// Creo un esquema tomando el modelo de la colección
+				const dinamicSchema = new Schema(generator.convert(modelo), { collection: coleccion.name })
+				// Creo un modelo tomando el esquema de la colección
+				const ColeccionDinamica = bbddColeccion.model('ColeccionDinamica', dinamicSchema);
+
+				// Guardo los datos recibidos en la request en la colección
+				ColeccionDinamica.find({}, (err, respuesta) => {
+					if (err) return res.status(500).send({ message: `Error realizar consulta: ${err}` })
+
+					// Elimino el modelo de la conexión
+					delete bbddColeccion.connection.models['ColeccionDinamica'];
+					
+					// Cierro la conexión a la bbdd
 					// bbdd.connection.close()
-					bbdd.disconnect()
-					console.log(chalk.yellow('----> Desconectado de: ' + bbdd.connection.name) )
-					return res.status(200).send(coleccionDinamica)
-				})				
+					bbddColeccion.disconnect()
+					console.log(chalk.yellow('----> Desconectado de: ' + bbddColeccion.connection.name) )
+
+					res.status(200).send({ data: respuesta })
+				})			
 			})
 			.catch((err) => {
-				console.log('++++++++++++ ERROR')
+				console.log(err)
 			})
+
 	})
 }
 
 
-function crearRegistro(req, res) {
-
-	// ddbb.connect('mongodb://localhost:27017/' + coleccion.projectId, (err, resolve) => {
-	// 	if (err) return res.status(500).send({ message: `ERROR al realizar conexion ddbb: ${err}` })
-		
-	// 	console.log('Conexión a la base de datos realizada...')
-
-	// 	const ColeccionDinamica = ddbb.model('ColeccionDinamica', dinamicSchema);
-	// 	let coleccionDinamica = new ColeccionDinamica
-	// 	coleccionDinamica['title 2'] = "Prueba 30"
-	// 	coleccionDinamica['number 2'] = 197234
-		
-	// 	coleccionDinamica.save((err, din) => {
-	// 		if (err) return res.status(500).send({ message: `Error al guardar coleccion: ${err}` })
-	// 		res.status(200).send({ coleccion: din })
-	// 	})
-	// })
-
-	res.status(200).send('Creo un registro')
-}
-
 module.exports = {
-	listarColeccion,
-	crearRegistro
+	listarColeccion
 }
