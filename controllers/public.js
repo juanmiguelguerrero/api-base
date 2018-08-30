@@ -16,10 +16,16 @@ function listarColeccion(req, res) {
 	Proyecto.findOne({ id: proyectoId, 'collections.name': coleccionName }, (err, proyecto) => {
 		if (err) return res.status(500).send({ message: `ERROR al realizar la consulta: ${err}` })
 		if (!proyecto) return res.status(400).send({ message: `ERROR: No existe el proyecto o la coleccion` })
+		
 		let bbddColeccion = new mongoose.Mongoose()
 
+		if (process.env.MONGODB_URI) {
+			URLConexion = config.db.replace('sistema', proyectoId)
+		} else {
+			URLConexion = config.db + '/' + proyectoId
+		}
 		// Abro una nueva bbdd con el nombre del proyecto
-		bbddColeccion.connect(config.db + "/" + proyectoId, {useNewUrlParser: true})
+		bbddColeccion.connect(URLConexion, {useNewUrlParser: true})
 			.then(() => {
 				console.log(chalk.yellow('----> Conectado a: ' + bbddColeccion.connection.name) )
 

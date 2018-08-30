@@ -68,9 +68,14 @@ function cargarDatos(req, res) {
 		if (!proyecto) return res.status(400).send({ message: `ERROR no existe el proyecto o colección` })
 
 		let bbddColeccion = new mongoose.Mongoose()
-
+		
+		if (process.env.MONGODB_URI) {
+			URLConexion = config.db.replace('sistema', proyectoId)
+		} else {
+			URLConexion = config.db + '/' + proyectoId
+		}
 		// Abro una nueva bbdd con el nombre del proyecto
-		bbddColeccion.connect(config.db + "/" + proyectoId, {useNewUrlParser: true})
+		bbddColeccion.connect(URLConexion, {useNewUrlParser: true})
 			.then(() => {
 				console.log(chalk.yellow('----> Conectado a: ' + bbddColeccion.connection.name) )
 
